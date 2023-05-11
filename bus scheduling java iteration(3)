@@ -1,0 +1,74 @@
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+import java.text.SimpleDateFormat;
+
+public class BusSchedule implements Runnable {
+    private String busName;
+    private String route;
+    private String departureLocation;
+    private String arrivalLocation;
+    private int interval;
+    private TimeUnit timeUnit;
+
+    public BusSchedule(String busName, String route, String departureLocation, String arrivalLocation, int interval, TimeUnit timeUnit) {
+        this.busName = busName;
+        this.route = route;
+        this.departureLocation = departureLocation;
+        this.arrivalLocation = arrivalLocation;
+        this.interval = interval;
+        this.timeUnit = timeUnit;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            // Get the current time and add the interval to get the departure time
+            Calendar departureTime = Calendar.getInstance();
+            departureTime.add(Calendar.SECOND, interval);
+
+            // Get the arrival time by adding the duration of the journey to the departure time
+            Calendar arrivalTime = Calendar.getInstance();
+            arrivalTime.setTimeInMillis(departureTime.getTimeInMillis() + getJourneyDuration());
+
+            // Format the times and output the schedule
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            String formattedDepartureTime = sdf.format(departureTime.getTime());
+            String formattedArrivalTime = sdf.format(arrivalTime.getTime());
+            System.out.println(busName + " departing at " + formattedDepartureTime + " from " + departureLocation +
+                    ", arriving at " + formattedArrivalTime + " at " + arrivalLocation + " on " + route);
+
+            // Sleep for the specified interval
+            try {
+                timeUnit.sleep(interval);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Get the duration of the journey in milliseconds
+    private long getJourneyDuration() {
+        // This is a dummy implementation that returns a fixed duration of 30 minutes
+        return TimeUnit.MINUTES.toMillis(30);
+    }
+
+    public static void main(String[] args) {
+        BusSchedule busSchedule1 = new BusSchedule("Bus 1", "Route A", "Location 1", "Location 2", 10, TimeUnit.SECONDS);
+        BusSchedule busSchedule2 = new BusSchedule("Bus 2", "Route B", "Location 3", "Location 4", 15, TimeUnit.SECONDS);
+        BusSchedule busSchedule3 = new BusSchedule("Bus 3", "Route C", "Location 5", "Location 6", 20, TimeUnit.SECONDS);
+        BusSchedule busSchedule4 = new BusSchedule("Bus 4", "Route D", "Location 7", "Location 8", 25, TimeUnit.SECONDS);
+        BusSchedule busSchedule5 = new BusSchedule("Bus 5", "Route E", "Location 9", "Location 10", 30, TimeUnit.SECONDS);
+
+        Thread thread1 = new Thread(busSchedule1);
+        Thread thread2 = new Thread(busSchedule2);
+        Thread thread3 = new Thread(busSchedule3);
+        Thread thread4 = new Thread(busSchedule4);
+        Thread thread5 = new Thread(busSchedule5);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+        thread5.start();
+    }
+}
