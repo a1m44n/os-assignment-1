@@ -1,0 +1,49 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.Random;
+
+public class CinemaBooking implements Runnable {
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static final int[] SeatNo = new int[30];
+    private String CustomerName;
+    private Random rand = new Random();
+
+    public CinemaBooking(String CustomerName) {
+        this.CustomerName = CustomerName;
+    }
+
+    public void run() {
+        lock.lock();
+        try {
+            int Seats;
+            System.out.printf("Welcome %s! Please have a look at the seating plan.\n\n", CustomerName);
+            // ...Print seating plan...
+            for (int j = 0; j < SeatNo.length; j++) {
+                System.out.printf("%d\t", j);
+                if ((j + 1) % 5 == 0) {
+                    System.out.println();
+                }
+            }
+            System.out.println("\n");
+            // ...Book a seat...
+            Seats = rand.nextInt(30);
+            while (SeatNo[Seats] == 1) {
+                Seats = rand.nextInt(30);
+            }
+            SeatNo[Seats] = 1;  // Mark the seat as booked
+            System.out.println("Seat " + Seats + " is successfully booked by " + CustomerName);
+            System.out.println("Thanks for booking!\n");
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        for (int i = 0; i < 5; i++) {
+            executorService.submit(new CinemaBooking("Customer " + (i + 1)));
+        }
+        executorService.shutdown();
+    }
+}
